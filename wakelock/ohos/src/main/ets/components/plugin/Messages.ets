@@ -1,26 +1,22 @@
 import StandardMessageCodec from '@ohos/flutter_ohos/src/main/ets/plugin/common/StandardMessageCodec';
 import BasicMessageChannel, { Reply } from '@ohos/flutter_ohos/src/main/ets/plugin/common/BasicMessageChannel';
-import { BinaryMessenger,TaskQueue } from '@ohos/flutter_ohos/src/main/ets/plugin/common/BinaryMessenger';
+import { BinaryMessenger, TaskQueue } from '@ohos/flutter_ohos/src/main/ets/plugin/common/BinaryMessenger';
 import MessageCodec from '@ohos/flutter_ohos/src/main/ets/plugin/common/MessageCodec';
 import { ByteBuffer } from '@ohos/flutter_ohos/src/main/ets/util/ByteBuffer';
 
 
 /** Error class for passing custom error details to Flutter via a thrown PlatformException. */
 export class FlutterError implements Error {
-
   /** The error code. */
   public code: string;
-
   /** The error name. */
   public name: string;
-
   /** The error message. */
   public message: string;
   /** The error stack. */
   public stack?: string;
 
-  constructor(code: string, name: string,  message: string, stack: string) 
-  {
+  constructor(code: string, name: string, message: string, stack: string) {
     this.code = code;
     this.name = name;
     this.message = message;
@@ -134,57 +130,59 @@ class WakelockApiCodec extends StandardMessageCodec {
 
 /* Generated abstract class from Pigeon that represents a handler of messages from Flutter.*/
 export abstract class WakelockApi {
+  abstract toggle(msg: ToggleMessage): Promise<void>;
 
-  abstract toggle(msg: ToggleMessage ): void;
+  abstract isEnabled(): Promise<IsEnabledMessage>;
 
-  abstract isEnabled(): IsEnabledMessage;
   /** The codec used by WakelockApi. */
-  static getCodec(): MessageCodec<Object>{
+  static getCodec(): MessageCodec<Object> {
     return WakelockApiCodec.INSTANCE;
   }
+
   /*Sets up an instance of `WakelockApi` to handle messages through the `binaryMessenger`.*/
   static setup(binaryMessenger: BinaryMessenger, api: WakelockApi | null): void {
     {
       let channel: BasicMessageChannel<Object> =
-          new BasicMessageChannel(
-              binaryMessenger, "dev.flutter.pigeon.wakelock_platform_interface.WakelockApi.toggle", WakelockApi.getCodec());
+        new BasicMessageChannel(
+          binaryMessenger, "dev.flutter.pigeon.wakelock_platform_interface.WakelockApi.toggle", WakelockApi.getCodec());
       if (api != null) {
         channel.setMessageHandler({
-            onMessage(message: Object ,reply: Reply<Object> ) {
-              let args: Array<Object> = message as Array<Object>;
-              let res: Array<Object> = [];
-              try {
-                api!.toggle(args[0] as ToggleMessage);
-                res.push(null);
-              }
- catch (error) {
-                let wrappedError: Array<Object> = wrapError(error);
-                res = wrappedError;
-              }
-              reply.reply(res);
-            } });
+          async onMessage(message: Object, reply: Reply<Object>) {
+            let args: Array<Object> = message as Array<Object>;
+            let res: Array<Object> = [];
+            try {
+              await api!.toggle(args[0] as ToggleMessage);
+              res.push(null);
+            } catch (error) {
+              let wrappedError: Array<Object> = wrapError(error);
+              res = wrappedError;
+            }
+            reply.reply(res);
+          }
+        });
       } else {
         channel.setMessageHandler(null);
       }
     }
     {
       let channel: BasicMessageChannel<Object> =
-          new BasicMessageChannel(
-              binaryMessenger, "dev.flutter.pigeon.wakelock_platform_interface.WakelockApi.isEnabled", WakelockApi.getCodec());
+        new BasicMessageChannel(
+          binaryMessenger, "dev.flutter.pigeon.wakelock_platform_interface.WakelockApi.isEnabled",
+          WakelockApi.getCodec());
       if (api != null) {
         channel.setMessageHandler({
-            onMessage(message: Object ,reply: Reply<Object> ) {
-              let res: Array<Object> = [];
-              try {
-                let output: IsEnabledMessage = api!.isEnabled();
-                res.push(output);
-              }
- catch (error) {
-                let wrappedError: Array<Object> = wrapError(error);
-                res = wrappedError;
-              }
-              reply.reply(res);
-            } });
+          async onMessage(message: Object, reply: Reply<Object>) {
+            let res: Array<Object> = [];
+            try {
+              let output: IsEnabledMessage = await api!.isEnabled();
+              res.push(output);
+            } catch (error) {
+              let wrappedError: Array<Object> = wrapError(error);
+              res = wrappedError;
+            }
+            reply.reply(res);
+          }
+        });
       } else {
         channel.setMessageHandler(null);
       }

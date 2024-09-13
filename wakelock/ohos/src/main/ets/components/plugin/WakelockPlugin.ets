@@ -1,17 +1,29 @@
 import {
+  AbilityAware,
+  AbilityPluginBinding,
   FlutterPlugin,
   FlutterPluginBinding,
-  MethodCall,
-  MethodCallHandler,
-  MethodChannel,
-  MethodResult,
 } from '@ohos/flutter_ohos';
 
-/** WakelockPlugin **/
-export default class WakelockPlugin implements FlutterPlugin, MethodCallHandler {
-  private channel: MethodChannel | null = null;
+import { WakelockApi, ToggleMessage, IsEnabledMessage } from './Messages'
+import { Context } from '@ohos.abilityAccessCtrl';
+import runningLock from '@ohos.runningLock';
+import window from '@ohos.window';
 
-  constructor() {
+
+/** WakelockPlugin **/
+export default class WakelockPlugin extends WakelockApi implements FlutterPlugin, AbilityAware {
+  private context: Context | null = null;
+  private lock: runningLock.RunningLock | null = null;
+
+  onAttachedToAbility(binding: AbilityPluginBinding): void {
+    this.context = binding.getAbility().context;
+  }
+
+  onDetachedFromAbility(): void {
+    this.lock?.unhold();
+    this.lock = null;
+    this.context = null;
   }
 
   getUniqueClassName(): string {
@@ -19,21 +31,34 @@ export default class WakelockPlugin implements FlutterPlugin, MethodCallHandler 
   }
 
   onAttachedToEngine(binding: FlutterPluginBinding): void {
-    this.channel = new MethodChannel(binding.getBinaryMessenger(), "wakelock");
-    this.channel.setMethodCallHandler(this)
+    WakelockApi.setup(binding.getBinaryMessenger(), this)
   }
 
   onDetachedFromEngine(binding: FlutterPluginBinding): void {
-    if (this.channel != null) {
-      this.channel.setMethodCallHandler(null)
+    WakelockApi.setup(binding.getBinaryMessenger(), null)
+  }
+
+  async toggle(msg: ToggleMessage): Promise<void> {
+    try {
+      if (this.context != null) {
+        let windowClass = await window.getLastWindow(this.context);
+        await windowClass.setWindowKeepScreenOn(msg.getEnable());
+      }
+    } catch (err) {
+      console.error('toggle failed, err: ' + err);
     }
   }
 
-  onMethodCall(call: MethodCall, result: MethodResult): void {
-    if (call.method == "getPlatformVersion") {
-      result.success("OpenHarmony ^ ^ ")
-    } else {
-      result.notImplemented()
+  async isEnabled(): Promise<IsEnabledMessage> {
+    let isEnabled = false;
+    try {
+      if (this.context != null) {
+        let windowClass = await window.getLastWindow(this.context);
+        isEnabled = isEnabled || await windowClass.getWindowProperties().isKeepScreenOn;
+      }
+    } catch (err) {
+      console.error('toggle failed, err: ' + err);
     }
+    return new IsEnabledMessage(isEnabled);
   }
 }
