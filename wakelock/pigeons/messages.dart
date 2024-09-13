@@ -22,6 +22,7 @@ class IsEnabledMessage {
   javaOptions: JavaOptions(
     package: 'creativemaybeno.wakelock',
   ),
+  arkTSOut: 'ohos/src/main/ets/components/plugin/Messages.ets',
 ))
 @HostApi(dartHostTestHandler: 'TestWakelockApi')
 abstract class WakelockApi {
