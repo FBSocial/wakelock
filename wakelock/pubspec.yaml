@@ -16,7 +16,11 @@ dependencies:
   meta: ^1.2.0
 
   wakelock_macos: ^0.4.0
-  wakelock_platform_interface: ^0.3.0
+  wakelock_platform_interface:
+    git: 
+      url: 'https://github.com/FBSocial/wakelock.git'
+      path: 'wakelock_platform_interface'
+      ref: wakelock_platform_interface_ohos_v0.3.1
   wakelock_web: ^0.4.0
   wakelock_windows: ^0.2.0
 

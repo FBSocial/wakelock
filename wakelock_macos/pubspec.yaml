@@ -14,7 +14,11 @@ dependencies:
   flutter_web_plugins:
     sdk: flutter
 
-  wakelock_platform_interface: ^0.3.0
+  wakelock_platform_interface:
+    git: 
+      url: 'https://github.com/FBSocial/wakelock.git'
+      path: 'wakelock_platform_interface'
+      ref: wakelock_platform_interface_ohos_v0.3.1
 
 dev_dependencies:
   flutter_test:
